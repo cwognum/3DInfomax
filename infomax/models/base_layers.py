@@ -141,10 +141,19 @@ class MLP(nn.Module):
                 FCLayer(hidden_size, out_dim, activation=last_activation, batch_norm=last_batch_norm,
                         device=device, dropout=dropout, batch_norm_momentum=batch_norm_momentum))
 
-    def forward(self, x):
-        for fc in self.fully_connected:
+    def forward(self, x, num_layers_to_drop: int = 0):
+        if num_layers_to_drop > len(self.fully_connected):
+            raise ValueError("num_layers_to_drop cannot be larger than the total number of layers")
+        if num_layers_to_drop == len(self.fully_connected):
+            return x
+
+        skip_after = len(self.fully_connected) - num_layers_to_drop - 1
+        for idx, fc in enumerate(self.fully_connected):
             x = fc(x)
+            if idx == skip_after:
+                break
         return x
+
 
 class MLPReadout(nn.Module):
 

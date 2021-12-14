@@ -127,11 +127,11 @@ class PNA(nn.Module):
                           mid_batch_norm=readout_batchnorm, out_dim=target_dim,
                           layers=readout_layers, batch_norm_momentum=batch_norm_momentum)
 
-    def forward(self, graph: dgl.DGLGraph):
+    def forward(self, graph: dgl.DGLGraph, num_layers_to_drop: int = 0):
         self.node_gnn(graph)
         readouts_to_cat = [dgl.readout_nodes(graph, 'feat', op=aggr) for aggr in self.readout_aggregators]
         readout = torch.cat(readouts_to_cat, dim=-1)
-        return self.output(readout)
+        return self.output(readout, num_layers_to_drop)
 
 
 class PNAGNN(nn.Module):

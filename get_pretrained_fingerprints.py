@@ -40,7 +40,8 @@ def load_model(model_type, model_parameters, checkpoint, avg_degree, device):
 @click.option("--input-smiles", type=click.Path(exists=True), required=True)
 @click.option("--output-dir", type=click.Path(file_okay=False), required=False)
 @click.option("--limit-size", type=int, required=False)
-def cli(input_smiles, output_dir, limit_size):
+@click.option("--num-layers-to-drop", type=int, default=1, required=False)
+def cli(input_smiles, output_dir, limit_size, num_layers_to_drop):
 
     if output_dir is None:
         output_dir = os.path.dirname(input_smiles)
@@ -51,7 +52,7 @@ def cli(input_smiles, output_dir, limit_size):
         args = yaml.safe_load(fd)
 
     device = torch.device("cpu")
-    dataset = QM9InferenceDataset(smiles, device=device, reprocess=True)
+    dataset = QM9InferenceDataset(smiles, device=device, reprocess=False)
     model = load_model(
         args["model_type"],
         args["model_parameters"],
@@ -63,7 +64,7 @@ def cli(input_smiles, output_dir, limit_size):
     batch_size = 32
     dataloader = DataLoader(dataset, collate_fn=dgl.batch, batch_size=batch_size)
     for batch in tqdm.tqdm(dataloader, desc="Computing fingerprints", total=len(dataset) // batch_size):
-        fps = model(batch)
+        fps = model(batch, num_layers_to_drop=num_layers_to_drop)
 
     print(fps)
 
