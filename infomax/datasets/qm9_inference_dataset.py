@@ -17,6 +17,8 @@ class QM9InferenceDataset(Dataset):
         self.processed_file = 'qm9inference_processed.pt'
         self.device = device
 
+        self.failed_indices = []
+
         # load the data and get normalization values
         if not os.path.exists(os.path.join(self.directory, 'processed', self.processed_file)) or reprocess:
             self.process(smiles_list)
@@ -69,7 +71,7 @@ class QM9InferenceDataset(Dataset):
         avg_degree = 0  # average degree in the dataset
         atomic_numbers = []
 
-        failed_smis = []
+        self.failed_indices = []
 
         for mol_idx, smi in tqdm(enumerate(smiles_list), total=len(smiles_list)):
 
@@ -118,8 +120,8 @@ class QM9InferenceDataset(Dataset):
                 atomic_numbers.extend(atomic_numbers_list)
 
             except Exception as error:
-                failed_smis.append(smi)
-                print(f"Failed to process {smi} due to {error}. Skipping!")
+                self.failed_indices.append(mol_idx)
+                print(f"Failed to process {smi} due to {error}.")
 
         data_dict = {
             'mol_id': torch.tensor(mol_ids, dtype=torch.long),
@@ -136,6 +138,7 @@ class QM9InferenceDataset(Dataset):
         os.makedirs(os.path.join(self.directory, 'processed'), exist_ok=True)
         torch.save(data_dict, os.path.join(self.directory, 'processed', self.processed_file))
 
-        print(f"Failed to process a total of {len(failed_smis)} SMILES")
-        for idx, smi in enumerate(failed_smis):
-            print(f"({idx}) - {smi if smi != '' else '<empty>'}")
+        print(f"Failed to process a total of {len(self.failed_indices)} SMILES")
+        for mol_idx in self.failed_indices:
+            smi = smiles_list[mol_idx]
+            print(f"({mol_idx}) - {smi if smi != '' else '<empty>'}")

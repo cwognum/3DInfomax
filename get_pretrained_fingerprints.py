@@ -40,10 +40,9 @@ def load_model(model_type, model_parameters, checkpoint, avg_degree, device):
 @click.option("--input-smiles", type=click.Path(exists=True), required=True)
 @click.option("--output-dir", type=click.Path(file_okay=False), required=False)
 @click.option("--limit-size", type=int, required=False)
-@click.option("--batch-size", type=int, default=32, required=False)
 @click.option("--process-dataset/--use-cached-dataset", default=False)
 @click.option("--num-layers-to-drop", type=int, default=1, required=False)
-def cli(input_smiles, output_dir, limit_size, batch_size, process_dataset, num_layers_to_drop):
+def cli(input_smiles, output_dir, limit_size, process_dataset, num_layers_to_drop):
 
     if output_dir is None:
         output_dir = os.path.dirname(input_smiles)
@@ -64,10 +63,20 @@ def cli(input_smiles, output_dir, limit_size, batch_size, process_dataset, num_l
     )
 
     fps = []
-    dataloader = DataLoader(dataset, collate_fn=dgl.batch, batch_size=batch_size)
-    for batch in tqdm.tqdm(dataloader, desc="Computing fingerprints", total=len(dataset) // batch_size):
-        fp = model(batch, num_layers_to_drop=num_layers_to_drop)
-        fps.extend(fp.detach().tolist())
+    dataloader = DataLoader(dataset, collate_fn=dgl.batch, batch_size=1)
+    for idx, batch in enumerate(tqdm.tqdm(dataloader, desc="Computing fingerprints", total=len(smiles))):
+        try:
+            fp = model(batch, num_layers_to_drop=num_layers_to_drop)
+            fps.extend(fp.detach().tolist())
+        except KeyboardInterrupt:
+            raise
+        except:
+            print(f"Encoding {smiles[idx] if smiles[idx] != '' else '<empty>'} as all-zeroes")
+            fps.append(np.zeros_like(fps[0]))
+
+    for idx in sorted(dataset.failed_indices):
+        print(f"Encoding {smiles[idx] if smiles[idx] != '' else '<empty>'} as all-zeroes")
+        fps.insert(idx, np.zeros_like(fps[0]))
 
     fps = np.array(fps)
     with fsspec.open(os.path.join(output_dir, f"QM9_fingerprints_{num_layers_to_drop}.npy"), 'wb') as fd:
