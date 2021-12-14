@@ -70,7 +70,7 @@ def cli(input_smiles, output_dir, limit_size, batch_size, process_dataset, num_l
         fps.extend(fp.detach().tolist())
 
     fps = np.array(fps)
-    with fsspec.open(os.path.join(output_dir, "QM9_fingerprints.npy"), 'wb') as fd:
+    with fsspec.open(os.path.join(output_dir, f"QM9_fingerprints_{num_layers_to_drop}.npy"), 'wb') as fd:
         np.save(fd, fps)
 
 
