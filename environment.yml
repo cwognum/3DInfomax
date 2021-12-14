@@ -1,6 +1,10 @@
 name: 3DInfomax
 channels:
-  - defaults
+  - dglteam
+  - pyg
+  - pytorch
+  - conda-forge
+
 dependencies:
   - python=3.7
   - pytorch
@@ -8,8 +12,11 @@ dependencies:
   - torchaudio
   - cudatoolkit=10.2
   - rdkit
-  - pytorch-geometric
+  - pyg
   - dgl-cuda10.2
   - pot
   - numpy
   - certifi
+  - click
+  - tensorboard
+  - ogb

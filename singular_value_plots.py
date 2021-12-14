@@ -1,27 +1,19 @@
 import os
 from argparse import Namespace
 
-import numpy as np
-import torch
 import yaml
-from icecream import ic
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader, Subset
-from datasets.custom_collate import *  # do not remove
-from models import *  # do not remove
-from torch.nn import *  # do not remove
-from torch.optim import *  # do not remove
+from torch.utils.data import DataLoader
 from commons.losses import *  # do not remove
-from torch.optim.lr_scheduler import *  # do not remove
-from datasets.samplers import *  # do not remove
+from infomax.datasets.samplers import *  # do not remove
 import seaborn as sn
 
 sn.set_theme()
 from commons.utils import get_random_indices
-from datasets.geom_drugs_dataset import GEOMDrugs
-from datasets.geom_qm9_dataset import GEOMqm9
-from datasets.qm9_dataset import QM9Dataset
-from datasets.qmugs_dataset import QMugsDataset
+from infomax.datasets.geom_drugs_dataset import GEOMDrugs
+from infomax.datasets.geom_qm9_dataset import GEOMqm9
+from infomax.datasets.qm9_dataset import QM9Dataset
+from infomax.datasets.qmugs_dataset import QMugsDataset
 
 checkpoints = [
     'runs/PNA_qm9_NTXent_batchsize500_123_29-08_09-40-39/best_checkpoint.pt',
