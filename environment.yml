@@ -20,3 +20,7 @@ dependencies:
   - click
   - tensorboard
   - ogb
+  - icecream
+
+  - pip:
+    - pyaml
