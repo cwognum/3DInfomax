@@ -21,6 +21,7 @@ dependencies:
   - tensorboard
   - ogb
   - icecream
+  - fsspec
 
   - pip:
     - pyaml
