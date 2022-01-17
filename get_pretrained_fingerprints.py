@@ -37,7 +37,7 @@ def load_model(model_type, model_parameters, checkpoint, avg_degree, device):
 
 
 @click.command()
-@click.option("--input-smiles", type=click.Path(exists=True), required=True)
+@click.option("--input-smiles", type=str, required=True)
 @click.option("--output-dir", type=click.Path(file_okay=False), required=False)
 @click.option("--limit-size", type=int, required=False)
 @click.option("--batch-size", type=int, default=1, required=False)
@@ -48,7 +48,8 @@ def cli(input_smiles, output_dir, limit_size, batch_size, process_dataset, num_l
     if output_dir is None:
         output_dir = os.path.dirname(input_smiles)
 
-    smiles = np.load(input_smiles)[:limit_size]
+    with fsspec.open(input_smiles) as fd:
+        smiles = np.load(fd)[:limit_size]
 
     with fsspec.open("configs_clean/tune_QM9_homo.yml") as fd:
         args = yaml.safe_load(fd)
